@@ -20,14 +20,7 @@ function! predictive#suggest(base)
         "find fuzzy completion word
         let l:matches = predictive#find_word(a:base)
     else
-        "add previous word to predictive file
-        let l:words = split(getline('.'))
-        if len(l:words) > 0
-            let l:word = l:words[-1]
-            if predictive#is_valid_word(l:word)
-              :call predictive#new_word(l:word)
-            endif
-        endif
+        :call predictive#new_word()
         let l:matches = sort(g:predictive#dict_new_words, "predictive#compare")
     endif
     let l:matches_return = []
@@ -43,28 +36,36 @@ function! predictive#suggest(base)
     return l:matches_return[0:g:predictive#max_suggests - 1]
 endfunction
 
-function! predictive#new_word(word)
-    if predictive#exists_word(a:word)
-        let s:tmp_words = []
-        for w in g:predictive#dict_new_words
-          if match(split(w, ',')[0], a:word) != '-1'
-            :call add(s:tmp_words, a:word . ',' . (split(w, ',')[1] + 1))
-          else
-            :call add(s:tmp_words, w)
-          endif
-        endfor
-        let g:predictive#dict_new_words = s:tmp_words
-        if filewritable(g:predictive#file_dict_new)
-          :call writefile(g:predictive#dict_new_words, g:predictive#file_dict_new)
-        else
-          echoerr "can not write to the file:" . g:predictive#file_dict_new
-        endif
-    else
-        :call add(g:predictive#dict_new_words, a:word . ',1')
-        if filewritable(g:predictive#file_dict_new)
-          :call writefile(g:predictive#dict_new_words, g:predictive#file_dict_new)
-        else
-          echoerr "can not write to the file:" . g:predictive#file_dict_new
+function! predictive#new_word()
+    "add previous word to predictive file
+    let l:word=''
+    let l:words = split(getline('.'))
+    if len(l:words) > 0
+        let l:word = l:words[-1]
+        if predictive#is_valid_word(l:word)
+            if predictive#exists_word(l:word)
+                let s:tmp_words = []
+                for w in g:predictive#dict_new_words
+                if match(split(w, ',')[0], l:word) != '-1'
+                    :call add(s:tmp_words, l:word . ',' . (split(w, ',')[1] + 1))
+                else
+                    :call add(s:tmp_words, w)
+                endif
+                endfor
+                let g:predictive#dict_new_words = s:tmp_words
+                if filewritable(g:predictive#file_dict_new)
+                :call writefile(g:predictive#dict_new_words, g:predictive#file_dict_new)
+                else
+                echoerr "can not write to the file:" . g:predictive#file_dict_new
+                endif
+            else
+                :call add(g:predictive#dict_new_words, l:word . ',1')
+                if filewritable(g:predictive#file_dict_new)
+                :call writefile(g:predictive#dict_new_words, g:predictive#file_dict_new)
+                else
+                echoerr "can not write to the file:" . g:predictive#file_dict_new
+                endif
+            endif
         endif
     endif
 endfunction
@@ -101,7 +102,7 @@ function! predictive#compare(i1, i2)
 endfunc
 
 function! predictive#is_valid_word(word)
-  if a:word =~ '' || a:word =~ '^\d\+$' || a:word =~ '\W'
+  if a:word == '' || a:word =~ '^\d\+$' || a:word =~ '\W'
     return 0
   endif
   return 1

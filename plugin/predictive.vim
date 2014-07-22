@@ -14,22 +14,18 @@
 " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 " GNU General Public License for more details.
 
-if exists("g:predictive#load")
+if exists("g:loaded_predictive")
     finish
 endif
 ""save cpo options
 "let s:keepcpo = &cpo
 "set cpo&vim
 
-let g:predictive#load = 1
+let g:loaded_predictive = 1
 "TODO: remove this var
 let g:predictive#plugin_path = expand("<sfile>:p:h:h")
 let g:predictive#dictionary = g:predictive#plugin_path . "/dict/dict.txt"
 let g:predictive#file_dict_new = g:predictive#plugin_path . "/dict/dict.new.txt"
-
-if !exists("g:predictive#max_suggests")
-    let g:predictive#max_suggests=3
-endif
 
 let g:predictive#dict_words = []
 let g:predictive#dict_new_words = []
@@ -58,7 +54,9 @@ function! predictive#complete(findstart, base)
     endif
 endfunction
 
-set completefunc=predictive#complete
+function predictive#meetsForPredictive(context)
+  return 1
+endfunction
 
 if !exists("g:predictive#disable_keybinding")
     let g:predictive#disable_keybinding=0
@@ -68,9 +66,11 @@ if !exists("g:predictive#menu_message")
     let g:predictive#menu_message ="    << predictive"
 endif
 
-if !g:predictive#disable_keybinding
-    "imap <space> <space><C-x><C-u>
+if !exists("g:predictive#max_suggests")
+    let g:predictive#max_suggests=10
 endif
+
+set completefunc=predictive#complete
 
 call predictive#init()
 
