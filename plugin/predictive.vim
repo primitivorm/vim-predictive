@@ -26,9 +26,6 @@ let g:predictive#load = 1
 let g:predictive#plugin_path = expand("<sfile>:p:h:h")
 let g:predictive#dictionary = g:predictive#plugin_path . "/dict/dict.txt"
 let g:predictive#file_dict_new = g:predictive#plugin_path . "/dict/dict.new.txt"
-"if !exists("g:predictive#file_dict_new")
-  "let g:predictive#file_dict_new = escape(expand($HOME . "/dict.new.txt"), '\')
-"endif
 
 if !exists("g:predictive#max_suggests")
     let g:predictive#max_suggests=3
