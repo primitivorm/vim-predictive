@@ -1,4 +1,4 @@
-" vim-predictive: Given the first few letters of a word, for instance, it’s not too difficult to
+" vim-predictive: Given the first few letters of a word, for instance, it's not too difficult to
 "         predict what should come next.
 "      Author: Primitivo Roman
 "      Email: primitivo.roman.montero@gmail.com
@@ -21,7 +21,7 @@ function! predictive#suggest(base)
         let l:matches = predictive#find_word(a:base)
     else
         :call predictive#new_word()
-        let l:matches = sort(g:predictive#dict_new_words, "predictive#compare")
+        let l:matches = g:predictive#dict_new_words[0:g:predictive#max_suggests]
     endif
     let l:matches_return = []
     for m in l:matches
@@ -33,7 +33,8 @@ function! predictive#suggest(base)
         endif
         :call add(l:matches_return, pdict)
     endfor
-    return l:matches_return[0:g:predictive#max_suggests - 1]
+    "return l:matches_return[0:g:predictive#max_suggests - 1]
+    return l:matches_return
 endfunction
 
 function! predictive#new_word()
@@ -54,16 +55,18 @@ function! predictive#new_word()
                 endfor
                 let g:predictive#dict_new_words = s:tmp_words
                 if filewritable(g:predictive#file_dict_new)
-                :call writefile(g:predictive#dict_new_words, g:predictive#file_dict_new)
+                    let g:predictive#dict_new_words = sort(g:predictive#dict_new_words, "predictive#compare")
+                    :call writefile(g:predictive#dict_new_words, g:predictive#file_dict_new)
                 else
-                echoerr "can not write to the file:" . g:predictive#file_dict_new
+                    echoerr "can not write to the file:" . g:predictive#file_dict_new
                 endif
             else
                 :call add(g:predictive#dict_new_words, l:word . ',1')
                 if filewritable(g:predictive#file_dict_new)
-                :call writefile(g:predictive#dict_new_words, g:predictive#file_dict_new)
+                    let g:predictive#dict_new_words = sort(g:predictive#dict_new_words, "predictive#compare")
+                    :call writefile(g:predictive#dict_new_words, g:predictive#file_dict_new)
                 else
-                echoerr "can not write to the file:" . g:predictive#file_dict_new
+                    echoerr "can not write to the file:" . g:predictive#file_dict_new
                 endif
             endif
         endif
@@ -72,18 +75,27 @@ endfunction
 
 function! predictive#find_word(word)
     let l:matches = []
-    "find in dict.add.txt
+    let l:count = 0
+    "find in dict.new.txt
     for n in g:predictive#dict_new_words
         if match(n, '^' . a:word) != '-1'
             :call add(l:matches, split(n, ',')[0])
+            let l:count = l:count + 1
+        endif
+        if l:count > g:predictive#max_suggests
+            return l:matches
         endif
     endfor
     "find in dict.txt
-    for d in g:predictive#dict_words
-        if match(d, '^' . a:word) != '-1'
-            :call add(l:matches, d)
-        endif
-    endfor
+    "for d in g:predictive#dict_words
+        "if match(d, '^' . a:word) != '-1'
+            ":call add(l:matches, d)
+            "let l:count = l:count + 1
+        "endif
+        "if l:count > g:predictive#max_suggests
+            "return l:matches
+        "endif
+    "endfor
     return l:matches
 endfunction
 

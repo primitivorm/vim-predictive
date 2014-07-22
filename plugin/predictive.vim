@@ -1,4 +1,4 @@
-" vim-predictive: Given the first few letters of a word, for instance, it’s not too difficult to
+" vim-predictive: Given the first few letters of a word, for instance, it's not too difficult to
 "                   predict what should come next.
 "        Author: Primitivo Roman
 "        Email: primitivo.roman.montero@gmail.com
@@ -17,6 +17,13 @@
 if exists("g:loaded_predictive")
     finish
 endif
+
+if exists("g:predictive#disable_plugin") && g:predictive#disable_plugin
+    finish
+else
+    let g:predictive#disable_plugin=0
+endif
+
 ""save cpo options
 "let s:keepcpo = &cpo
 "set cpo&vim
@@ -32,12 +39,17 @@ let g:predictive#dict_new_words = []
 
 function! predictive#init()
     "get words from dict
-    if filereadable(g:predictive#dictionary)
-        let g:predictive#dict_words = readfile(g:predictive#dictionary)
-    endif
+    "if filereadable(g:predictive#dictionary)
+        "let g:predictive#dict_words = readfile(g:predictive#dictionary)
+        "let g:predictive#dict_words = sort(g:predictive#dict_words)
+    "endif
     "get words from dict.new
     if filereadable(g:predictive#file_dict_new)
         let g:predictive#dict_new_words = readfile(g:predictive#file_dict_new)
+        "delete empty lines
+        :call filter(g:predictive#dict_new_words, '!empty(v:val)')
+        "order by freq
+        :call sort(g:predictive#dict_new_words, "predictive#compare")
     endif
 endfunction
 
@@ -70,7 +82,6 @@ if !exists("g:predictive#max_suggests")
     let g:predictive#max_suggests=10
 endif
 
-set completefunc=predictive#complete
 
 call predictive#init()
 
