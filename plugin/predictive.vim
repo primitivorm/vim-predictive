@@ -22,65 +22,39 @@ if exists("g:predictive#disable_plugin") && g:predictive#disable_plugin
     finish
 else
     let g:predictive#disable_plugin=0
+    au vimenter * call predictive#init()
+    au vimleave * call predictive#write_dict_new()
+    "for completefunc
+    set completefunc=predictive#complete
+    "for acp integration
+    let g:acp_behaviorUserDefinedFunction = 'predictive#complete'
+    let g:acp_behaviorUserDefinedMeets = 'predictive#meets_for_predictive'
+
+"let jsbehavs = { 'javascript': [] }
+    "call add(jsbehavs.javascript, {
+        "\   'command'      : "\<C-x>\<C-u>",
+        "\   'completefunc' : 'acp#completeSnipmate',
+        "\   'meets'        : 'acp#meetsForSnipmate',
+        "\   'onPopupClose' : 'acp#onPopupCloseSnipmate',
+        "\   'repeat'       : 0,
+    "\})
+    "call add(jsbehavs.javascript, {
+        "\   'command' : g:acp_behaviorKeywordCommand,
+        "\   'meets'   : 'acp#meetsForKeyword',
+        "\   'repeat'  : 0,
+        "\ })
+    "call add(jsbehavs.javascript, {
+        "\    'command'  : "\<C-x>\<C-o>",
+        "\    'meets'   : 'acp#meetsForKeyword',
+        "\    'repeat'   : 0,
+    "\})
+"let g:acp_behavior = {}
+"call extend(g:acp_behavior, jsbehavs, 'keep')
 endif
 
-""save cpo options
-"let s:keepcpo = &cpo
-"set cpo&vim
-
 let g:loaded_predictive = 1
-"TODO: remove this var
-let g:predictive#plugin_path = expand("<sfile>:p:h:h")
-let g:predictive#dictionary = g:predictive#plugin_path . "/dict/dict.txt"
-let g:predictive#file_dict_new = g:predictive#plugin_path . "/dict/dict.new.txt"
-
+let g:predictive#dict_path = expand("<sfile>:p:h:h") . "/dict/dict.predictive.txt"
 let g:predictive#dict_words = []
-let g:predictive#dict_new_words = []
-
-function! predictive#init()
-    "get words from dict
-    if filereadable(g:predictive#dictionary)
-        let g:predictive#dict_words = readfile(g:predictive#dictionary)
-        let g:predictive#dict_words = sort(g:predictive#dict_words)
-    endif
-    "get words from dict.new
-    if filereadable(g:predictive#file_dict_new)
-        let g:predictive#dict_new_words = readfile(g:predictive#file_dict_new)
-        "delete empty lines
-        :call filter(g:predictive#dict_new_words, '!empty(v:val)')
-        "order by freq
-        :call sort(g:predictive#dict_new_words, "predictive#compare")
-    endif
-endfunction
-
-function! predictive#complete(findstart, base)
-    if a:findstart
-        let line = getline(".")
-        let start = col(".") - 1
-        while start > 0 && line[start - 1] =~ '\a\|_'
-            let start -= 1
-        endwhile
-        return start
-    else
-        return predictive#suggest(a:base)
-    endif
-endfunction
-
-function predictive#meetsForPredictive(context)
-  if g:predictive#behaviorLength < 0
-    return 0
-  endif
-  let matches = matchlist(a:context, '\(\k\{' . g:predictive#behaviorLength . ',}\)$')
-  if empty(matches)
-    return 0
-  endif
-  for ignore in g:predictive#behaviorKeywordIgnores
-    if stridx(ignore, matches[1]) == 0
-      return 0
-    endif
-  endfor
-  return 1
-endfunction
 
 if !exists("g:predictive#disable_keybinding")
     let g:predictive#disable_keybinding=0
@@ -94,16 +68,6 @@ if !exists("g:predictive#max_suggests")
     let g:predictive#max_suggests=10
 endif
 
-if !exists("g:predictive#behaviorLength")
-    let g:predictive#behaviorLength=0
+if !exists("g:predictive#only_words")
+    let g:predictive#only_words=1
 endif
-
-if !exists("g:predictive#behaviorKeywordIgnores")
-    let g:predictive#behaviorKeywordIgnores=[]
-endif
-
-call predictive#init()
-
-""restore cpo options
-"let &cpo= s:keepcpo
-"unlet s:keepcpo
