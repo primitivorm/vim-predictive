@@ -86,16 +86,16 @@ function! predictive#find_word(word)
             return l:matches
         endif
     endfor
-    "find in dict.txt
-    "for d in g:predictive#dict_words
-        "if match(d, '^' . a:word) != '-1'
-            ":call add(l:matches, d)
-            "let l:count = l:count + 1
-        "endif
-        "if l:count > g:predictive#max_suggests
-            "return l:matches
-        "endif
-    "endfor
+    find in dict.txt
+    for d in g:predictive#dict_words
+        if match(d, '^' . a:word) != '-1'
+            :call add(l:matches, d)
+            let l:count = l:count + 1
+        endif
+        if l:count > g:predictive#max_suggests
+            return l:matches
+        endif
+    endfor
     return l:matches
 endfunction
 

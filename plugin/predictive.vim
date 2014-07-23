@@ -39,10 +39,10 @@ let g:predictive#dict_new_words = []
 
 function! predictive#init()
     "get words from dict
-    "if filereadable(g:predictive#dictionary)
-        "let g:predictive#dict_words = readfile(g:predictive#dictionary)
-        "let g:predictive#dict_words = sort(g:predictive#dict_words)
-    "endif
+    if filereadable(g:predictive#dictionary)
+        let g:predictive#dict_words = readfile(g:predictive#dictionary)
+        let g:predictive#dict_words = sort(g:predictive#dict_words)
+    endif
     "get words from dict.new
     if filereadable(g:predictive#file_dict_new)
         let g:predictive#dict_new_words = readfile(g:predictive#file_dict_new)
@@ -67,6 +67,18 @@ function! predictive#complete(findstart, base)
 endfunction
 
 function predictive#meetsForPredictive(context)
+  if g:predictive#behaviorLength < 0
+    return 0
+  endif
+  let matches = matchlist(a:context, '\(\k\{' . g:predictive#behaviorLength . ',}\)$')
+  if empty(matches)
+    return 0
+  endif
+  for ignore in g:predictive#behaviorKeywordIgnores
+    if stridx(ignore, matches[1]) == 0
+      return 0
+    endif
+  endfor
   return 1
 endfunction
 
@@ -82,6 +94,13 @@ if !exists("g:predictive#max_suggests")
     let g:predictive#max_suggests=10
 endif
 
+if !exists("g:predictive#behaviorLength")
+    let g:predictive#behaviorLength=0
+endif
+
+if !exists("g:predictive#behaviorKeywordIgnores")
+    let g:predictive#behaviorKeywordIgnores=[]
+endif
 
 call predictive#init()
 
