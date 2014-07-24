@@ -20,40 +20,13 @@ endif
 
 if exists("g:predictive#disable_plugin") && g:predictive#disable_plugin
     finish
-else
-    let g:predictive#disable_plugin=0
-    au vimenter * call predictive#init()
-    au vimleave * call predictive#write_dict_new()
-    "for completefunc
-    set completefunc=predictive#complete
-    "for acp integration
-    let g:acp_behaviorUserDefinedFunction = 'predictive#complete'
-    let g:acp_behaviorUserDefinedMeets = 'predictive#meets_for_predictive'
-
-"let jsbehavs = { 'javascript': [] }
-    "call add(jsbehavs.javascript, {
-        "\   'command'      : "\<C-x>\<C-u>",
-        "\   'completefunc' : 'acp#completeSnipmate',
-        "\   'meets'        : 'acp#meetsForSnipmate',
-        "\   'onPopupClose' : 'acp#onPopupCloseSnipmate',
-        "\   'repeat'       : 0,
-    "\})
-    "call add(jsbehavs.javascript, {
-        "\   'command' : g:acp_behaviorKeywordCommand,
-        "\   'meets'   : 'acp#meetsForKeyword',
-        "\   'repeat'  : 0,
-        "\ })
-    "call add(jsbehavs.javascript, {
-        "\    'command'  : "\<C-x>\<C-o>",
-        "\    'meets'   : 'acp#meetsForKeyword',
-        "\    'repeat'   : 0,
-    "\})
-"let g:acp_behavior = {}
-"call extend(g:acp_behavior, jsbehavs, 'keep')
 endif
 
 let g:loaded_predictive = 1
-let g:predictive#dict_path = expand("<sfile>:p:h:h") . "/dict/dict.predictive.txt"
+if !exists("g:predictive#dict_path")
+    let g:predictive#dict_path = expand("<sfile>:p:h:h") . "/dict/en_US.txt"
+endif
+
 let g:predictive#dict_words = []
 
 if !exists("g:predictive#disable_keybinding")
@@ -65,9 +38,14 @@ if !exists("g:predictive#menu_message")
 endif
 
 if !exists("g:predictive#max_suggests")
-    let g:predictive#max_suggests=10
+    let g:predictive#max_suggests=25
 endif
 
 if !exists("g:predictive#only_words")
     let g:predictive#only_words=1
 endif
+
+"start predictive
+let g:predictive#disable_plugin=0
+call predictive#enable()
+au vimleave * call predictive#disable()

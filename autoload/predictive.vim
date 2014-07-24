@@ -14,29 +14,46 @@
 " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 " GNU General Public License for more details.
 
-function! predictive#init()
+function! predictive#enable()
+    set completefunc=predictive#complete
     "get words from dict.predictive.txt
     if len(g:predictive#dict_words) == 0
         if filereadable(g:predictive#dict_path)
             let g:predictive#dict_words = readfile(g:predictive#dict_path)
             "delete empty lines
-            :call filter(g:predictive#dict_words, '!empty(v:val)')
+            call filter(g:predictive#dict_words, '!empty(v:val)')
             "order by freq
-            :call sort(g:predictive#dict_words, "predictive#compare")
+            call sort(g:predictive#dict_words, "predictive#compare")
         endif
     endif
+    let prebehavs = { 'text': [] }
+        call add(prebehavs.text, {
+            \   'command'      : "\<C-x>\<C-u>",
+            \   'completefunc' : 'predictive#complete',
+            \   'meets'        : 'predictive#meets_for_predictive',
+            \   'repeat'       : '1',
+        \})
+    if !exists("g:acp_behavior")
+        let g:acp_behavior = {}
+    endif
+    call extend(g:acp_behavior, prebehavs, 'keep')
 endfunction
 
-function! predictive#complete(findstart, base)
-    if exists("g:predictive#only_words") && g:predictive#only_words
-        let s:pattern = '\v[^a-zA-ZñÑáéíóúÁÉÍÓÚ]'
-    else
-        let s:pattern = '\v[^a-zA-Z0-9_]'
+function! predictive#disable()
+    call predictive#write_dict()
+    let g:predictive#dict_words = []
+    if &completefunc == 'predictive#complete'
+        set completefunc=
     endif
+    "call remove(g:acp_behavior, "text")
+endfunction
+
+
+function! predictive#complete(findstart, base)
     if a:findstart
         let line = getline(".")
         let start = col(".") - 1
-        while start > 0 && line[start - 1] !~  s:pattern
+        while start > 0 && line[start - 1] =~ '\a\|_'
             let start -= 1
         endwhile
         return start
@@ -46,11 +63,11 @@ function! predictive#complete(findstart, base)
 endfunction
 
 function! predictive#meets_for_predictive(context)
-  let matches = a:context
-  if empty(matches)
-    return 0
-  endif
-  return 1
+    echomsg a:context
+    if g:predictive#disable_plugin
+        return 0
+    endif
+    return predictive#is_valid_word(a:context)
 endfunction
 
 function! predictive#suggest(base)
@@ -59,8 +76,8 @@ function! predictive#suggest(base)
         "TODO: Add find fuzzy completion word
         let l:matches = predictive#find_word(a:base)
     else
-        :call predictive#new_word()
-        let l:matches = g:predictive#dict_words[0:g:predictive#max_suggests -1]
+        call predictive#new_word()
+        let l:matches = g:predictive#dict_words[0:g:predictive#max_suggests]
     endif
     let l:matches_return = []
     for m in l:matches
@@ -70,7 +87,7 @@ function! predictive#suggest(base)
         else
             let pdict.menu = ""
         endif
-        :call add(l:matches_return, pdict)
+        call add(l:matches_return, pdict)
     endfor
     return l:matches_return
 endfunction
@@ -86,24 +103,24 @@ function! predictive#new_word()
                 let s:tmp_words = []
                 for w in g:predictive#dict_words
                 if match(split(w, ',')[0], l:word) != '-1'
-                    :call add(s:tmp_words, l:word . ',' . (split(w, ',')[1] + 1))
+                    call add(s:tmp_words, l:word . ',' . (split(w, ',')[1] + 1))
                 else
-                    :call add(s:tmp_words, w)
+                    call add(s:tmp_words, w)
                 endif
                 endfor
                 let g:predictive#dict_words = s:tmp_words
             else
-                :call add(g:predictive#dict_words, l:word . ',1')
+                call add(g:predictive#dict_words, l:word . ',1')
             endif
         endif
     endif
 endfunction
 
-function! predictive#write_dict_new()
+function! predictive#write_dict()
     if filewritable(g:predictive#dict_path)
         "delete duplicate lines
-        :call filter(g:predictive#dict_words, 'index(g:predictive#dict_words, v:val, v:key + 1) == -1')
-        :call writefile(g:predictive#dict_words, g:predictive#dict_path)
+        call filter(g:predictive#dict_words, 'index(g:predictive#dict_words, v:val, v:key + 1) == -1')
+        call writefile(g:predictive#dict_words, g:predictive#dict_path)
     else
         echoerr "can not write to the file:" . g:predictive#dict_path
     endif
@@ -115,8 +132,8 @@ function! predictive#find_word(word)
     "find in dict.new.txt
     for n in g:predictive#dict_words
         if match(n, '^' . a:word) != '-1'
-            :call add(l:matches, split(n, ',')[0])
-            let l:count = l:count + 1
+            call add(l:matches, split(n, ',')[0])
+            let l:count += 1
         endif
         if l:count >= g:predictive#max_suggests
             return l:matches
@@ -140,7 +157,8 @@ function! predictive#compare(i1, i2)
 endfunc
 
 function! predictive#is_valid_word(word)
-    if a:word == '' || a:word =~ s:pattern
+    let l:matches = matchlist(a:word, '\w')
+    if empty(l:matches)
         return 0
     endif
     return 1
