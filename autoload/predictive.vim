@@ -15,7 +15,7 @@
 " GNU General Public License for more details.
 
 function! predictive#enable()
-    set completefunc=predictive#complete
+    let &completefunc='predictive#complete'
     "get words from dict.txt
     if len(g:predictive#dict_words) == 0
         if filereadable(g:predictive#dict_path)
@@ -48,9 +48,9 @@ endfunction
 
 function! predictive#disable()
     call predictive#write_dict()
-    let g:predictive#dict_words = []
+    "let g:predictive#dict_words = []
     if &completefunc == 'predictive#complete'
-        set completefunc=
+        let &completefunc=''
     endif
     "call remove(g:acp_behavior, "text")
 endfunction
@@ -69,7 +69,6 @@ function! predictive#complete(findstart, base)
 endfunction
 
 function! predictive#meets_for_predictive(context)
-    echomsg a:context
     if g:predictive#disable_plugin
         return 0
     endif
