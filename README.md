@@ -11,8 +11,7 @@ Bundle 'primitivorm/vim-predictive'
 options
 --------------
 
-All options have reasonable defaults so if the plug-in works after installation
-you don't need to change any options. These options can be configured in your
+These options can be configured in your
 [vimrc script][vimrc] by including a line like this:
 
     let g:predictive#disable_plugin
@@ -31,11 +30,12 @@ Default = 0 (enabled)
 ###The `g.predictive#dict_path` option
 
 Specify the path file for the dictionary.
-Default = {bundle_path}/vim-predictive/dict_sample/en_US
+Default = ''
 
     let g:predictive#dict_path = expand($HOME . '/dict')
 
-View {dict_sample} directory for saples.
+View {dict_sample} directory for saples. The file must be file read/write
+permissions
 
 ###The `g:predictive#file_types` option
 

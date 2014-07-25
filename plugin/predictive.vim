@@ -24,16 +24,16 @@ endif
 
 let g:loaded_predictive = 1
 if !exists("g:predictive#dict_path")
-    " echomsg 'you must specify g:predictive#dict_path'
-    " finish
-    let g:predictive#dict_path = expand("<sfile>:p:h:h") . "/dict_sample/en_US.txt"
+     echomsg 'you must specify g:predictive#dict_path'
+     finish
+    "let g:predictive#dict_path = expand("<sfile>:p:h:h") . "/dict_sample/en_US.txt"
 endif
 
 let g:predictive#dict_words = []
 
-if !exists("g:predictive#disable_keybinding")
-    let g:predictive#disable_keybinding=0
-endif
+"if !exists("g:predictive#disable_keybinding")
+    "let g:predictive#disable_keybinding=0
+"endif
 
 if !exists("g:predictive#menu_message")
     let g:predictive#menu_message ="    << predictive"
@@ -43,9 +43,9 @@ if !exists("g:predictive#max_suggests")
     let g:predictive#max_suggests=25
 endif
 
-if !exists("g:predictive#only_words")
-    let g:predictive#only_words=1
-endif
+"if !exists("g:predictive#only_words")
+    "let g:predictive#only_words=1
+"endif
 
 if !exists("g:predictive#file_types")
     let g:predictive#file_types = ['text']

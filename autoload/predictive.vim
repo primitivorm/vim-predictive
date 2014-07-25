@@ -15,10 +15,6 @@
 " GNU General Public License for more details.
 
 function! predictive#enable()
-    if !filereadable(g:predictive#dict_path)
-        let lst = []
-        call writefile(lst, g:predictive#dict_path)
-    endif
     set completefunc=predictive#complete
     "get words from dict.txt
     if len(g:predictive#dict_words) == 0
@@ -29,6 +25,8 @@ function! predictive#enable()
             "order by freq
             call sort(g:predictive#dict_words, "predictive#compare")
         else
+            "let lst = []
+            "call writefile(lst, g:predictive#dict_path)
             echomsg "Can not read file " . g:predictive#dict_path
         endif
     endif
@@ -130,7 +128,7 @@ function! predictive#write_dict()
         call filter(g:predictive#dict_words, 'index(g:predictive#dict_words, v:val, v:key + 1) == -1')
         call writefile(g:predictive#dict_words, g:predictive#dict_path)
     else
-        echoerr "can not write to the file:" . g:predictive#dict_path
+        echoerr "Can not write to the file:" . g:predictive#dict_path
     endif
 endfunction
 
