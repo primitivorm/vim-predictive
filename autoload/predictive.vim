@@ -15,8 +15,12 @@
 " GNU General Public License for more details.
 
 function! predictive#enable()
+    if !filereadable(g:predictive#dict_path)
+        let lst = []
+        call writefile(lst, g:predictive#dict_path)
+    endif
     set completefunc=predictive#complete
-    "get words from dict.predictive.txt
+    "get words from dict.txt
     if len(g:predictive#dict_words) == 0
         if filereadable(g:predictive#dict_path)
             let g:predictive#dict_words = readfile(g:predictive#dict_path)
@@ -24,19 +28,24 @@ function! predictive#enable()
             call filter(g:predictive#dict_words, '!empty(v:val)')
             "order by freq
             call sort(g:predictive#dict_words, "predictive#compare")
+        else
+            echomsg "Can not read file " . g:predictive#dict_path
         endif
     endif
-    let prebehavs = { 'text': [] }
-        call add(prebehavs.text, {
+    "let prebehavs = {}
+    for key in keys(g:predictive#file_types)
+        call add(g:predictive#file_types[key], {
             \   'command'      : "\<C-x>\<C-u>",
             \   'completefunc' : 'predictive#complete',
             \   'meets'        : 'predictive#meets_for_predictive',
-            \   'repeat'       : '1',
+            \   'repeat'       : '0',
         \})
+    endfor
+    "let prebehavs = { 'text' : [] }
     if !exists("g:acp_behavior")
         let g:acp_behavior = {}
     endif
-    call extend(g:acp_behavior, prebehavs, 'keep')
+    call extend(g:acp_behavior, g:predictive#file_types, 'keep')
 endfunction
 
 function! predictive#disable()
@@ -47,7 +56,6 @@ function! predictive#disable()
     endif
     "call remove(g:acp_behavior, "text")
 endfunction
-
 
 function! predictive#complete(findstart, base)
     if a:findstart
@@ -102,11 +110,11 @@ function! predictive#new_word()
             if predictive#exists_word(l:word)
                 let s:tmp_words = []
                 for w in g:predictive#dict_words
-                if match(split(w, ',')[0], l:word) != '-1'
-                    call add(s:tmp_words, l:word . ',' . (split(w, ',')[1] + 1))
-                else
-                    call add(s:tmp_words, w)
-                endif
+                    if match(split(w, ',')[0], '^' . l:word . '$')  != '-1'
+                        call add(s:tmp_words, l:word . ',' . (split(w, ',')[1] + 1))
+                    else
+                        call add(s:tmp_words, w)
+                    endif
                 endfor
                 let g:predictive#dict_words = s:tmp_words
             else

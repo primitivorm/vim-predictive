@@ -24,7 +24,9 @@ endif
 
 let g:loaded_predictive = 1
 if !exists("g:predictive#dict_path")
-    let g:predictive#dict_path = expand("<sfile>:p:h:h") . "/dict/en_US.txt"
+    " echomsg 'you must specify g:predictive#dict_path'
+    " finish
+    let g:predictive#dict_path = expand("<sfile>:p:h:h") . "/dict_sample/en_US.txt"
 endif
 
 let g:predictive#dict_words = []
@@ -45,7 +47,12 @@ if !exists("g:predictive#only_words")
     let g:predictive#only_words=1
 endif
 
+if !exists("g:predictive#file_types")
+    let g:predictive#file_types = ['text']
+endif
+
 "start predictive
 let g:predictive#disable_plugin=0
 call predictive#enable()
 au vimleave * call predictive#disable()
+au winleave * call predictive#disable()
