@@ -25,34 +25,30 @@ function! predictive#enable()
             "order by freq
             call sort(g:predictive#dict_words, "predictive#compare")
         else
-            "let lst = []
-            "call writefile(lst, g:predictive#dict_path)
-            echomsg "Can not read file " . g:predictive#dict_path
+            echoerr "Can not read file " . g:predictive#dict_path
         endif
     endif
-    "let prebehavs = {}
     for key in keys(g:predictive#file_types)
         call add(g:predictive#file_types[key], {
             \   'command'      : "\<C-x>\<C-u>",
             \   'completefunc' : 'predictive#complete',
             \   'meets'        : 'predictive#meets_for_predictive',
-            \   'repeat'       : '0',
+            \   'repeat'       : '1',
         \})
     endfor
-    "let prebehavs = { 'text' : [] }
     if !exists("g:acp_behavior")
         let g:acp_behavior = {}
     endif
     call extend(g:acp_behavior, g:predictive#file_types, 'keep')
+    let g:predictive#disable_plugin=0
 endfunction
 
 function! predictive#disable()
     call predictive#write_dict()
-    "let g:predictive#dict_words = []
     if &completefunc == 'predictive#complete'
         let &completefunc=''
     endif
-    "call remove(g:acp_behavior, "text")
+    let g:predictive#disable_plugin=1
 endfunction
 
 function! predictive#complete(findstart, base)
@@ -72,7 +68,10 @@ function! predictive#meets_for_predictive(context)
     if g:predictive#disable_plugin
         return 0
     endif
-    return predictive#is_valid_word(a:context)
+    if empty(a:context)
+        return 0
+    endif
+    return 1
 endfunction
 
 function! predictive#suggest(base)
@@ -135,24 +134,28 @@ function! predictive#find_word(word)
     let l:matches = []
     let l:count = 0
     "find in dict.new.txt
-    for n in g:predictive#dict_words
-        if match(n, '^' . a:word) != '-1'
-            call add(l:matches, split(n, ',')[0])
-            let l:count += 1
-        endif
-        if l:count >= g:predictive#max_suggests
-            return l:matches
-        endif
-    endfor
+    if !empty(g:predictive#dict_words)
+        for n in g:predictive#dict_words
+            if match(n, '^' . a:word) != '-1'
+                call add(l:matches, split(n, ',')[0])
+                let l:count += 1
+            endif
+            if l:count >= g:predictive#max_suggests
+                return l:matches
+            endif
+        endfor
+    endif
     return l:matches
 endfunction
 
 function! predictive#exists_word(word)
-    for w in g:predictive#dict_words
-        if match(split(w, ',')[0], '^' . a:word . '$' ) != '-1'
-            return 1
-        endif
-    endfor
+    if !empty(g:predictive#dict_words)
+        for w in g:predictive#dict_words
+            if match(split(w, ',')[0], '^' . a:word . '$' ) != '-1'
+                return 1
+            endif
+        endfor
+    endif
     return 0
 endfunction
 
@@ -162,8 +165,7 @@ function! predictive#compare(i1, i2)
 endfunc
 
 function! predictive#is_valid_word(word)
-    let l:matches = matchlist(a:word, '\w')
-    if empty(l:matches)
+    if a:word == '' || a:word =~ '^\d\+$' || a:word =~ '\W'
         return 0
     endif
     return 1

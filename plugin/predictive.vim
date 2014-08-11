@@ -31,10 +31,6 @@ endif
 
 let g:predictive#dict_words = []
 
-"if !exists("g:predictive#disable_keybinding")
-    "let g:predictive#disable_keybinding=0
-"endif
-
 if !exists("g:predictive#menu_message")
     let g:predictive#menu_message ="    << predictive"
 endif
@@ -43,16 +39,13 @@ if !exists("g:predictive#max_suggests")
     let g:predictive#max_suggests=25
 endif
 
-"if !exists("g:predictive#only_words")
-    "let g:predictive#only_words=1
-"endif
-
 if !exists("g:predictive#file_types")
-    let g:predictive#file_types = ['text']
+    let g:predictive#file_types = {
+                \ "text" : []
+    }
 endif
 
 "start predictive
 let g:predictive#disable_plugin=0
 call predictive#enable()
-au vimleave * call predictive#disable()
-au winleave * call predictive#disable()
+autocmd bufwrite * call predictive#write_dict()
