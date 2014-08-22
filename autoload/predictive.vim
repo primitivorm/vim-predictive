@@ -14,37 +14,15 @@
 " MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 " GNU General Public License for more details.
 
+let s:plugin_path = escape(expand('<sfile>:p:h'), '\')
+
 function! predictive#enable()
-    let &completefunc='predictive#complete'
-    "get words from dict.txt
-    if len(g:predictive#dict_words) == 0
-        if filereadable(g:predictive#dict_path)
-            let g:predictive#dict_words = readfile(g:predictive#dict_path)
-            "delete empty lines
-            call filter(g:predictive#dict_words, '!empty(v:val)')
-            "order by freq
-            call sort(g:predictive#dict_words, "predictive#compare")
-        else
-            echoerr "Can not read file " . g:predictive#dict_path
-        endif
-    endif
-    for key in keys(g:predictive#file_types)
-        call add(g:predictive#file_types[key], {
-            \   'command'      : "\<C-x>\<C-u>",
-            \   'completefunc' : 'predictive#complete',
-            \   'meets'        : 'predictive#meets_for_predictive',
-            \   'repeat'       : '1',
-        \})
-    endfor
-    if !exists("g:acp_behavior")
-        let g:acp_behavior = {}
-    endif
-    call extend(g:acp_behavior, g:predictive#file_types, 'keep')
+    call predictive#load_dict()
     let g:predictive#disable_plugin=0
 endfunction
 
 function! predictive#disable()
-    call predictive#write_dict()
+    call predictive#save_dict()
     if &completefunc == 'predictive#complete'
         let &completefunc=''
     endif
@@ -60,7 +38,11 @@ function! predictive#complete(findstart, base)
         endwhile
         return start
     else
-        return predictive#suggest(a:base)
+        if a:base!=''
+            return predictive#find_word(a:base)
+        else
+            return predictive#add_to_dict(a:base)
+        endif
     endif
 endfunction
 
@@ -74,99 +56,38 @@ function! predictive#meets_for_predictive(context)
     return 1
 endfunction
 
-function! predictive#suggest(base)
-    let l:matches = []
-    if a:base!=''
-        "TODO: Add find fuzzy completion word
-        let l:matches = predictive#find_word(a:base)
-    else
-        call predictive#new_word()
-        let l:matches = g:predictive#dict_words[0:g:predictive#max_suggests]
-    endif
-    let l:matches_return = []
-    for m in l:matches
-        let pdict={"word": split(m, ",")[0]}
-        if exists("g:predictive#menu_message")
-            let pdict.menu = g:predictive#menu_message
-        else
-            let pdict.menu = ""
-        endif
-        call add(l:matches_return, pdict)
-    endfor
-    return l:matches_return
+function! predictive#load_dict()
+    Python import predictive
+    Python predictive.load_dict()
 endfunction
 
-function! predictive#new_word()
-    "add previous word to predictive file
-    let l:word=''
-    let l:words = split(getline('.'))
-    if len(l:words) > 0
-        let l:word = l:words[-1]
-        if predictive#is_valid_word(l:word)
-            if predictive#exists_word(l:word)
-                let s:tmp_words = []
-                for w in g:predictive#dict_words
-                    if match(split(w, ',')[0], '^' . l:word . '$')  != '-1'
-                        call add(s:tmp_words, l:word . ',' . (split(w, ',')[1] + 1))
-                    else
-                        call add(s:tmp_words, w)
-                    endif
-                endfor
-                let g:predictive#dict_words = s:tmp_words
-            else
-                call add(g:predictive#dict_words, l:word . ',1')
-            endif
-        endif
-    endif
+function! predictive#add_to_dict(word)
+    Python import predictive
+    Python predictive.add_to_dict()
+    return s:__predictive_complete_lookup_result
 endfunction
 
-function! predictive#write_dict()
-    if filewritable(g:predictive#dict_path)
-        "delete duplicate lines
-        call filter(g:predictive#dict_words, 'index(g:predictive#dict_words, v:val, v:key + 1) == -1')
-        call writefile(g:predictive#dict_words, g:predictive#dict_path)
-    else
-        echoerr "Can not write to the file:" . g:predictive#dict_path
-    endif
+function! predictive#save_dict()
+    Python import predictive
+    Python predictive.save_dict()
 endfunction
 
 function! predictive#find_word(word)
-    let l:matches = []
-    let l:count = 0
-    "find in dict.new.txt
-    if !empty(g:predictive#dict_words)
-        for n in g:predictive#dict_words
-            if match(n, '^' . a:word) != '-1'
-                call add(l:matches, split(n, ',')[0])
-                let l:count += 1
-            endif
-            if l:count >= g:predictive#max_suggests
-                return l:matches
-            endif
-        endfor
-    endif
-    return l:matches
+    Python import predictive
+    Python predictive.find_word()
+    return s:__predictive_complete_lookup_result
 endfunction
 
-function! predictive#exists_word(word)
-    if !empty(g:predictive#dict_words)
-        for w in g:predictive#dict_words
-            if match(split(w, ',')[0], '^' . a:word . '$' ) != '-1'
-                return 1
-            endif
-        endfor
-    endif
-    return 0
-endfunction
+" ----------- Python prep
+if has('python')
+    command! -nargs=1 Python python <args>
+elseif has('python3')
+    command! -nargs=1 Python python3 <args>
+else
+    echoerr "No Python support found"
+endif
 
-function! predictive#compare(i1, i2)
-    "order by number descending
-    return split(a:i2, ',')[1] - split(a:i1, ',')[1]
-endfunc
-
-function! predictive#is_valid_word(word)
-    if a:word == '' || a:word =~ '^\d\+$' || a:word =~ '\W'
-        return 0
-    endif
-    return 1
-endfunction
+Python << PYTHONEOF
+import sys, os, vim
+sys.path.insert(0, os.path.join(vim.eval("expand('<sfile>:p:h:h')"), 'python'))
+PYTHONEOF
