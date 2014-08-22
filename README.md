@@ -39,7 +39,7 @@ permissions
 
 ###The `completefunc` option
 
-Set lines below in your _vimrc for automatic predictive:
+Set lines below in your _vimrc for automatic prediction:
 
     let &completefunc='predictive#complete'
     let g:acp_behaviorUserDefinedFunction = 'predictive#complete'
