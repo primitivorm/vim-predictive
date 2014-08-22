@@ -37,16 +37,14 @@ Default = ''
 View {dict_sample} directory for saples. The file must be file read/write
 permissions
 
-###The `g:predictive#file_types` option
+###The `completefunc` option
 
-Specify file types that uses the plugin
-Default = 'text'
+Set lines below in your _vimrc for automatic predictive:
 
-    let g:predictive#file_types = { 'vim' : [],
-            \ 'text': [],
-            \ 'python' : []
-            \}
+    let &completefunc='predictive#complete'
+    let g:acp_behaviorUserDefinedFunction = 'predictive#complete'
+    let g:acp_behaviorUserDefinedMeets = 'predictive#meets_for_predictive'
 
 NOTE:
 --------------
-This is a experimental version. Pull requests welcome!
+This is a testing version. Pull requests welcome!

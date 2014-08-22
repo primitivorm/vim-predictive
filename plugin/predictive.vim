@@ -38,6 +38,7 @@ if !exists("g:predictive#dict_path")
 endif
 
 let g:predictive#dict_words = []
+let s:__predictive_complete_lookup_result=[]
 
 if !exists("g:predictive#OriginNotePredictive")
     let g:predictive#OriginNotePredictive="    << predictive"
@@ -110,12 +111,6 @@ endif
 "predictive-auto-add-to-dict is also set.
 if !exists("g:predictive#add_to_dict_ask")
     let g:predictive#add_to_dict_ask=0
-endif
-
-if !exists("g:predictive#file_types")
-    let g:predictive#file_types = {
-                \ "text" : []
-    }
 endif
 
 "start predictive
