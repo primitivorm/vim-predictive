@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/python
 
 # vim-predictive: Given the first few letters of a word, for instance, it's not too difficult to
@@ -18,25 +19,36 @@
 
 import re
 import codecs
+import locale
+import os
 import sys
 import string
 import thirdparty
 from collections import Counter
 from collections import OrderedDict
 
-def read_file(_path):
+def read_file(_path, _encoding):
     #infile = codecs.open(_path, "r", encoding='latin1')
     #lines = [x.encode('latin1').strip().split() for x in infile.readlines()]
-    infile = open(_path, "r")
-    lines = [x.strip().split() for x in infile.readlines()]
-    infile.close()
-    return list_to_dict(lines)
+    _dict = {}
+    lines = []
+    if os.path.exists(_path):
+        infile = codecs.open(_path, "r", encoding=_encoding)
+        lines = [x.encode(_encoding).strip().split() for x in infile.readlines()]
+        #infile = open(_path, "r")
+        #lines = [x.strip().split() for x in infile.readlines()]
+        infile.close()
+        _dict = list_to_dict(lines)
+    else:
+        #open(_path, 'w').close()
+        codecs.open(_path, 'w', encoding=_encoding).close()
+    return _dict
 
-def write_file(_path, _dict):
-    #outfile = codecs.open(_path, "w", encoding='latin1')
-    #outfile.write(str('\n'.join(dict_to_list(_dict)).decode('latin1')))
-    outfile = open(_path, "w")
-    outfile.write('\n'.join(dict_to_list(_dict)))
+def write_file(_path, _dict, _encoding):
+    outfile = codecs.open(_path, "w", encoding=_encoding)
+    outfile.write(str('\n'.join(dict_to_list(_dict)).decode(_encoding)))
+    #outfile = open(_path, "w")
+    #outfile.write('\n'.join(dict_to_list(_dict)))
     outfile.close()
 
 def list_to_dict(_list):
@@ -59,14 +71,22 @@ def dict_to_list(_dict):
     return list_return
 
 def is_valid_word(_word, _save_id =0):
-    if _save_id:
-        reg_ex = re.compile(r"^[^\d\W]\w*\Z", re.UNICODE)
-    else:
-        reg_ex = re.compile(r"^[a-zA-Z]+$", re.UNICODE)
-    return re.match(reg_ex,_word)
+    rb = False
+    locale.getdefaultlocale()
+    try:
+        if _save_id:
+            #reg_ex = re.compile(r"^[^\d\W]\w*\Z", re.UNICODE)
+            reg_ex = re.compile(r"^[^\d\W]\w*\Z")
+        else:
+            #reg_ex = re.compile(r"^[a-zA-Z]+$", re.UNICODE)
+            reg_ex = re.compile(r"^[a-zA-Z]+$")
+        rb = re.match(reg_ex,_word)
+    except:
+        pass
+    return rb
 
 def dict_reset_all_values(_dict, _val=0):
-    return dict.fromkeys(_dict.iterkeys(), _val )
+    return dict.fromkeys(_dict.iterkeys(), _val)
 
 def dict_reset_value(_dict, _key, _val=0):
     if _key in _dict:
@@ -169,7 +189,8 @@ def produce_result_value(matches_list, origin_note, want_show_origin):
     """
     result_list = []
     for match in matches_list:
-        new_match_dict = {"word": thirdparty.PythonToVimStr(match)}
+        #new_match_dict = {"word": thirdparty.PythonToVimStr(match)}
+        new_match_dict = {"word": match}
         if want_show_origin:
             new_match_dict["menu"] = origin_note
         result_list.append(new_match_dict)

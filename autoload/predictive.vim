@@ -19,12 +19,29 @@ let s:plugin_path = escape(expand('<sfile>:p:h'), '\')
 function! predictive#enable()
     call predictive#load_dict()
     let g:predictive#disable_plugin=0
+    let g:predictive#old_completefunc = &completefunc
+    let &completefunc = 'predictive#complete'
+    for key in keys(g:predictive#file_types)
+        call add(g:predictive#file_types[key], {
+            \   'command'      : "\<C-x>\<C-u>",
+            \   'completefunc' : 'predictive#complete',
+            \   'meets'        : 'predictive#meets_for_predictive',
+            \   'repeat'       : '0',
+        \})
+    endfor
+    if !exists("g:acp_behavior")
+        let g:acp_behavior = {}
+    endif
+    call extend(g:acp_behavior, g:predictive#file_types, 'keep')
 endfunction
 
 function! predictive#disable()
+    if !exists("g:predictive#words")
+        let g:predictive#words = {}
+    endif
     call predictive#save_dict()
     if &completefunc == 'predictive#complete'
-        let &completefunc=''
+        let &completefunc = g:predictive#old_completefunc
     endif
     let g:predictive#disable_plugin=1
 endfunction
@@ -53,6 +70,13 @@ function! predictive#meets_for_predictive(context)
     if empty(a:context)
         return 0
     endif
+    if g:predictive#behaviorLength < 0
+        return 0
+    endif
+    let matches = matchlist(a:context, '\(\k\{' . g:predictive#behaviorLength . ',}\)$')
+    if empty(matches)
+        return 0
+    endif
     return 1
 endfunction
 
@@ -62,9 +86,32 @@ function! predictive#load_dict()
 endfunction
 
 function! predictive#add_to_dict(word)
+    let s:__predictive_complete_lookup_result =[]
     Python import predictive
     Python predictive.add_to_dict()
     return s:__predictive_complete_lookup_result
+endfunction
+
+function! predictive#remove_from_dict(word)
+    Python import predictive
+    Python predictive.remove_from_dict()
+endfunction
+
+function! predictive#reset_weight(...)
+    let s:word = ''
+    let s:weight = 0
+    if a:0 > 0
+        if a:1 != '""' && a:1 != "''"
+            let s:word = a:1
+        endif
+    endif
+    if a:0 > 1
+        if a:2 > 0
+            let s:weight = a:2
+        endif
+    endif
+    Python import predictive
+    Python predictive.reset_weight()
 endfunction
 
 function! predictive#save_dict()
@@ -73,9 +120,19 @@ function! predictive#save_dict()
 endfunction
 
 function! predictive#find_word(word)
+    let s:__predictive_complete_lookup_result =[]
     Python import predictive
     Python predictive.find_word()
     return s:__predictive_complete_lookup_result
+endfunction
+
+function! predictive#dictree_size()
+    echomsg len(g:predictive#words)
+endfunction
+
+function! predictive#learn_from_buffer()
+    Python import predictive
+    Python predictive.learn_from_buffer()
 endfunction
 
 " ----------- Python prep
