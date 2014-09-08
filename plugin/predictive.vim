@@ -70,6 +70,10 @@ if !exists("g:predictive#fuzzy_completion_min_chars")
     let g:predictive#fuzzy_completion_min_chars=5
 endif
 
+if !exists("g:predictive#fuzzy_completion_min_distance")
+    let g:predictive#fuzzy_completion_min_distance=4
+endif
+
 if !exists("g:predictive#auto_save_dict")
     let g:predictive#auto_save_dict=1
 endif

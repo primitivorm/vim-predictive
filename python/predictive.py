@@ -34,6 +34,7 @@ SAVE_IDENTIFIERS=vim.eval('g:predictive#save_identifiers')
 IGNORE_INITIAL_CAPS=vim.eval('g:predictive#ignore_initial_caps')
 FUZZY_COMPLETION_ENABLE=vim.eval('g:predictive#fuzzy_completion_enable')
 FUZZY_COMPLETION_MIN_CHARS=int(vim.eval('g:predictive#fuzzy_completion_min_chars'))
+FUZZY_COMPLETION_MIN_DISTANCE=int(vim.eval('g:predictive#fuzzy_completion_min_distance'))
 ORIGIN_NOTE = vim.eval("g:predictive#OriginNotePredictive")
 AUTO_ADD_MIN_CHARS=int(vim.eval('g:predictive#auto_add_min_chars'))
 MIN_CHARS_SUGGESTION=int(vim.eval('g:predictive#min_chars_suggestion'))
@@ -41,8 +42,6 @@ WANT_SHOW_ORIGIN = int(vim.eval("g:predictive#ShowOriginNote"))
 VIM_COMMAND_PREDICTIVE_COMPLETE = 'silent let s:__predictive_complete_lookup_result = %s'
 
 encoding = vim.eval("&encoding")
-#encoding = 'latin1'
-#encoding = 'cp1252'
 
 def load_dict():
     words = utils.read_file(DICT_PATH, encoding)
@@ -73,7 +72,7 @@ def find_word():
     #fuzzy search
     if FUZZY_COMPLETION_ENABLE:
         if len(word) >= FUZZY_COMPLETION_MIN_CHARS:
-            found_matches.extend(utils.fuzzy_completion(list(words), word, MAX_CANDIDATES))
+            found_matches.extend(utils.fuzzy_completion(list(words), word, FUZZY_COMPLETION_MIN_DISTANCE, MAX_CANDIDATES))
     vim.command(VIM_COMMAND_PREDICTIVE_COMPLETE
                 % repr(utils.produce_result_value(
                 found_matches,

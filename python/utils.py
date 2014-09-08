@@ -122,7 +122,7 @@ def levenshtein(a,b):
             current[j] = min(add, delete, change)
     return current[n]
 
-def fuzzy_completion(_list, word, MAX_RESULTS=10):
+def fuzzy_completion(_list, word, MIN_DISTANCE, MAX_RESULTS=10):
     results=[]
     distances = None
     distances_1 = {}
@@ -152,12 +152,13 @@ def fuzzy_completion(_list, word, MAX_RESULTS=10):
                 if word_len < w_len:
                     w_len=word_len
                 d = levenshtein(w[0:w_len],word)
-                try:
-                    distancesList=distances[d]
-                except:
-                    distancesList =[]
-                    distances[d]=distancesList
-                distancesList.append(w)
+                if d <= MIN_DISTANCE:
+                    try:
+                        distancesList=distances[d]
+                    except:
+                        distancesList =[]
+                        distances[d]=distancesList
+                    distancesList.append(w)
             distances=None
         if endwalk:
             break
@@ -189,8 +190,8 @@ def produce_result_value(matches_list, origin_note, want_show_origin):
     """
     result_list = []
     for match in matches_list:
-        #new_match_dict = {"word": thirdparty.PythonToVimStr(match)}
-        new_match_dict = {"word": match}
+        new_match_dict = {"word": thirdparty.PythonToVimStr(match)}
+        #new_match_dict = {"word": match}
         if want_show_origin:
             new_match_dict["menu"] = origin_note
         result_list.append(new_match_dict)

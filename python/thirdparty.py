@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+#!/usr/bin/python
+
 # For the class PythonToVimStr (part of jedi-vim)
 # Licensed under the GNU LGPL v3 or later.
 # Copyright (C) 2012 David Halter <davidhalter88@gmail.com>.
