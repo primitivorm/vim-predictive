@@ -44,6 +44,14 @@ VIM_COMMAND_PREDICTIVE_COMPLETE = 'silent let s:__predictive_complete_lookup_res
 encoding = vim.eval("&encoding")
 
 def load_dict():
+    """
+    Load a dictionary by name, and add it to the list of dictionaries used by the
+    current buffer. The dictionary will be included when learning from the buffer,
+    and if its autosave flag is set, it will automatically
+    be saved when the buffer is killed. The dictionary file must be in your loadpath.
+    You should never normally need to use this command interactively, since predictive
+    mode loads and unloads dictionaries automatically, as needed.
+    """
     words = utils.read_file(DICT_PATH, encoding)
     vim.command('let g:predictive#words = %s' % words)
 
@@ -51,7 +59,6 @@ def save_dict():
     """
     Save dictionary DICT to its associated file.
     Use `predictive-write-dict' to save to a different file.
-    See also `predictive-dict-compilation'.
     """
     words = vim.eval('g:predictive#words')
     utils.write_file(DICT_PATH, words, encoding)
@@ -112,6 +119,10 @@ def add_to_dict():
                 WANT_SHOW_ORIGIN)))
 
 def remove_from_dict():
+    """
+    Completely remove a word from a dictionary. The dictionary name and word
+    are read from the mini-buffer (defaults to the word at the point).
+    """
     words = vim.eval('g:predictive#words')
     word = vim.eval("a:word").decode(encoding)
     if word in words:
@@ -137,6 +148,19 @@ def reset_weight():
     vim.command('let g:predictive#words = %s' % words)
 
 def learn_from_buffer():
+    """
+    Learns weights for words in a dictionary from text in a buffer. If no explicit
+    dictionary is specified, this learns word weights for all dictionaries used by the
+    current buffer.
+    Each occurrence of a word increments its weight in the dictionary. By default,
+    only occurrences that occur in a region where the dictionary is active are
+    counted. If an explicit
+    dictionary is specified, this can be overridden by supplying a prefix argument,
+    in which case all occurrences are counted, irrespective of whether the dictionary
+    is active at the word occurrence. Note that you cannot use this command
+    to add words to a dictionary, only to train the weights of words already in a
+    dictionary.
+    """
     words = vim.eval('g:predictive#words')
     for line in vim.current.buffer:
         for w in line.split():
