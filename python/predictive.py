@@ -99,8 +99,12 @@ def add_to_dict():
     (r, c) = vim.current.window.cursor
     ws = vim.current.line[:c]
     l = ws.split()
+    w = ''
     if len(l) > 1:
         w = l[-1]
+    elif len (l) == 1:
+        w = l[0]
+    if w!='':
         if w in words:
             if AUTO_LEARN:
                 words[w] = int(words[w]) + 1
@@ -110,13 +114,7 @@ def add_to_dict():
                     if len(w) >= AUTO_ADD_MIN_CHARS:
                         words.setdefault(w.encode(encoding), 0)
         vim.command('let g:predictive#words = %s' % words)
-    found_matches=[]
-    found_matches = utils.most_common(words, MIN_CHARS_SUGGESTION, MAX_CANDIDATES)
-    vim.command(VIM_COMMAND_PREDICTIVE_COMPLETE
-                % repr(utils.produce_result_value(
-                found_matches,
-                ORIGIN_NOTE,
-                WANT_SHOW_ORIGIN)))
+    return ''
 
 def remove_from_dict():
     """

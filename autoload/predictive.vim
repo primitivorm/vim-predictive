@@ -57,8 +57,6 @@ function! predictive#complete(findstart, base)
     else
         if a:base!=''
             return predictive#find_word(a:base)
-        else
-            return predictive#add_to_dict(a:base)
         endif
     endif
 endfunction
@@ -85,11 +83,15 @@ function! predictive#load_dict()
     Python predictive.load_dict()
 endfunction
 
-function! predictive#add_to_dict(word)
-    let s:__predictive_complete_lookup_result =[]
-    Python import predictive
-    Python predictive.add_to_dict()
-    return s:__predictive_complete_lookup_result
+function! predictive#add_to_dict()
+    if g:predictive#add_to_dict_ask
+        let response = confirm("Add word to the dictionary?", "&Yes\n&No")
+        if response
+            Python import predictive
+            Python predictive.add_to_dict()
+        endif
+    endif
+    return ''
 endfunction
 
 function! predictive#remove_from_dict(word)

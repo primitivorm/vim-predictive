@@ -104,7 +104,7 @@ if !exists("g:predictive#auto_add_to_dict")
 endif
 
 "If non-nil (the default), auto-learnt and auto-added words are cached, and only
-"actually added to the dictionary when Emacs has been idle for predictiveflush-
+"actually added to the dictionary when Vim has been idle for predictiveflush-
 "auto-learn-delay seconds or the buffer is killed (it has no effect unless
 "at least one of predictive-auto-learn or predictive-auto-add-to-dict is
 "also set). This avoids small but sometimes noticeable delays when typing. New
@@ -142,26 +142,34 @@ endif
 let g:predictive#disable_plugin=0
 
 func! s:init_config()
-    " Define the default options.
-    if g:predictive#auto_save_dict
-        autocmd bufwrite * call predictive#save_dict()
-    endif
-    if g:predictive#auto_load
-        autocmd bufread * call predictive#enable()
+    if has('python')
+        " Define the default options.
+        if g:predictive#auto_save_dict
+            autocmd bufwrite * call predictive#save_dict()
+        endif
+        if g:predictive#auto_load
+            autocmd bufread * call predictive#enable()
+        endif
+        "default key bindings
+        inoremap <expr><cr> predictive#add_to_dict() . "\<cr>"
+        inoremap <expr><space> predictive#add_to_dict() . "\<space>"
+        inoremap <expr><esc> predictive#add_to_dict() . "\<esc>"
     endif
 endfunc
 
 func! s:init_commands()
-    " Add in the Ex commands.
-    command! -nargs=0 PredictiveEnable call predictive#enable()
-    command! -nargs=0 PredictiveDisable call predictive#disable()
-    command! -nargs=0 PredictiveDictreeSize call predictive#dictree_size()
-    command! -nargs=1 PredictiveRemoveFromDict call predictive#remove_from_dict(<f-args>)
-    command! -nargs=* PredictiveResetWeight call predictive#reset_weight(<f-args>)
-    "Learn word weights from BUFFER (defaults to the current buffer).
-    "The word weight of each word in dictionary DICT is incremented by
-    "the number of occurences of that word in the buffer.
-    command! -nargs=0 PredictiveLearnFromBuffer call predictive#learn_from_buffer()
+    if has('python')
+        " Add in the Ex commands.
+        command! -nargs=0 PredictiveEnable call predictive#enable()
+        command! -nargs=0 PredictiveDisable call predictive#disable()
+        command! -nargs=0 PredictiveDictreeSize call predictive#dictree_size()
+        command! -nargs=1 PredictiveRemoveFromDict call predictive#remove_from_dict(<f-args>)
+        command! -nargs=* PredictiveResetWeight call predictive#reset_weight(<f-args>)
+        "Learn word weights from BUFFER (defaults to the current buffer).
+        "The word weight of each word in dictionary DICT is incremented by
+        "the number of occurences of that word in the buffer.
+        command! -nargs=0 PredictiveLearnFromBuffer call predictive#learn_from_buffer()
+    endif
 endfunc
 
 if !exists("g:loaded_predictive")
