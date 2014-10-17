@@ -59,10 +59,6 @@ function! predictive#complete(findstart, base)
         let line = s:getCurrentText()
         let word = s:getCurrentWord()
         let start = stridx(line, word)
-        "while start > 0 && line[start - 1] =~ '\a\|_\|ñ'
-            "echo line[start - 1]
-            "let start -= 1
-        "endwhile
         return start
     else
         if a:base!=''
@@ -82,8 +78,6 @@ function! predictive#meets_for_predictive(context)
         return 0
     endif
     let matches = matchlist(a:context, '\(\k\{' . g:predictive#behaviorLength . ',}\)$')
-    "let matches = matchstr(a:context, '\k*$')
-    "if !len(matches)
     if empty(matches)
         return 0
     endif
