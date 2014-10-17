@@ -58,10 +58,6 @@ if !exists("g:predictive#prefer_python3")
     let g:predictive#prefer_python3=0
 endif
 
-if !exists("g:predictive#save_identifiers")
-    let g:predictive#save_identifiers=0
-endif
-
 if !exists("g:predictive#fuzzy_completion_enable")
     let g:predictive#fuzzy_completion_enable=1
 endif
@@ -84,6 +80,10 @@ endif
 
 if !exists("g:predictive#auto_load")
     let g:predictive#auto_load=1
+endif
+
+if !exists("g:predictive#keyword_patterns")
+    let g:predictive#keyword_patterns = '^[a-zA-Z]+$'
 endif
 
 "Controls automatic word frequency learning. When non-nil (the default), the

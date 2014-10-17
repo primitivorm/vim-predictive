@@ -23,32 +23,24 @@ import locale
 import os
 import sys
 import string
-import thirdparty
 from collections import Counter
 from collections import OrderedDict
 
 def read_file(_path, _encoding):
-    #infile = codecs.open(_path, "r", encoding='latin1')
-    #lines = [x.encode('latin1').strip().split() for x in infile.readlines()]
     _dict = {}
     lines = []
     if os.path.exists(_path):
-        infile = codecs.open(_path, "r", encoding=_encoding)
-        lines = [x.encode(_encoding).strip().split() for x in infile.readlines()]
-        #infile = open(_path, "r")
-        #lines = [x.strip().split() for x in infile.readlines()]
+        infile = open(_path, "r")
+        lines = [x.strip().split() for x in infile.readlines()]
         infile.close()
         _dict = list_to_dict(lines)
     else:
-        #open(_path, 'w').close()
         codecs.open(_path, 'w', encoding=_encoding).close()
     return _dict
 
 def write_file(_path, _dict, _encoding):
-    outfile = codecs.open(_path, "w", encoding=_encoding)
-    outfile.write(str('\n'.join(dict_to_list(_dict)).decode(_encoding)))
-    #outfile = open(_path, "w")
-    #outfile.write('\n'.join(dict_to_list(_dict)))
+    outfile = open(_path, "w")
+    outfile.write('\n'.join(dict_to_list(_dict)))
     outfile.close()
 
 def list_to_dict(_list):
@@ -70,16 +62,14 @@ def dict_to_list(_dict):
         list_return.append(key + ' ' + str(value))
     return list_return
 
-def is_valid_word(_word, _save_id =0):
+def is_valid_word(_word, _regex):
     rb = False
     locale.getdefaultlocale()
     try:
-        if _save_id:
-            #reg_ex = re.compile(r"^[^\d\W]\w*\Z", re.UNICODE)
-            reg_ex = re.compile(r"^[^\d\W]\w*\Z")
-        else:
-            #reg_ex = re.compile(r"^[a-zA-Z]+$", re.UNICODE)
-            reg_ex = re.compile(r"^[a-zA-Z]+$")
+        try:
+            reg_ex = re.compile(_regex)
+        except:
+            reg_ex = re.compile('^[a-zA-Z]+$')
         rb = re.match(reg_ex,_word)
     except:
         pass
@@ -188,11 +178,22 @@ def produce_result_value(matches_list, origin_note, want_show_origin):
     dictionaries accepted as completion function result.
     For possible entries see the Vim documentation *complete-items*
     """
-    result_list = []
-    for match in matches_list:
-        new_match_dict = {"word": thirdparty.PythonToVimStr(match)}
-        #new_match_dict = {"word": match}
-        if want_show_origin:
-            new_match_dict["menu"] = origin_note
-        result_list.append(new_match_dict)
-    return result_list
+    s = ''
+    s = '['
+    if want_show_origin:
+        for match in matches_list:
+            s += '{"word": "' + match + '", "menu":"' + origin_note +'"},'
+    else:
+        for match in matches_list:
+            s += '{"word": "' + match + '"},'
+    s+=']'
+    s= s.replace('},]', '}]')
+    return s
+
+def PythonDictToVimStr(_dict):
+    s = '{'
+    for key in _dict:
+        s += '"' + key + '":' + str(_dict[key]) + ','
+    s+='}'
+    s= s.replace(',}', '}')
+    return s

@@ -46,13 +46,23 @@ function! predictive#disable()
     let g:predictive#disable_plugin=1
 endfunction
 
+function s:getCurrentText()
+  return strpart(getline('.'), 0, col('.') - 1)
+endfunction
+
+function s:getCurrentWord()
+  return matchstr(s:getCurrentText(), '\k*$')
+endfunction
+
 function! predictive#complete(findstart, base)
     if a:findstart
-        let line = getline(".")
-        let start = col(".") - 1
-        while start > 0 && line[start - 1] =~ '\a\|_'
-            let start -= 1
-        endwhile
+        let line = s:getCurrentText()
+        let word = s:getCurrentWord()
+        let start = stridx(line, word)
+        "while start > 0 && line[start - 1] =~ '\a\|_\|ñ'
+            "echo line[start - 1]
+            "let start -= 1
+        "endwhile
         return start
     else
         if a:base!=''
@@ -72,6 +82,8 @@ function! predictive#meets_for_predictive(context)
         return 0
     endif
     let matches = matchlist(a:context, '\(\k\{' . g:predictive#behaviorLength . ',}\)$')
+    "let matches = matchstr(a:context, '\k*$')
+    "if !len(matches)
     if empty(matches)
         return 0
     endif
@@ -90,6 +102,9 @@ function! predictive#add_to_dict()
             Python import predictive
             Python predictive.add_to_dict()
         endif
+    else
+        Python import predictive
+        Python predictive.add_to_dict()
     endif
     return ''
 endfunction
@@ -122,6 +137,7 @@ function! predictive#save_dict()
 endfunction
 
 function! predictive#find_word(word)
+    "echoerr a:word
     let s:__predictive_complete_lookup_result =[]
     Python import predictive
     Python predictive.find_word()

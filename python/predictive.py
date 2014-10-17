@@ -30,7 +30,6 @@ DICT_PATH=vim.eval('g:predictive#dict_path')
 MAX_CANDIDATES=int(vim.eval('g:predictive#max_candidates'))
 AUTO_LEARN=vim.eval('g:predictive#auto_learn')
 AUTO_ADD_TO_DICT=vim.eval('g:predictive#auto_add_to_dict')
-SAVE_IDENTIFIERS=vim.eval('g:predictive#save_identifiers')
 IGNORE_INITIAL_CAPS=vim.eval('g:predictive#ignore_initial_caps')
 FUZZY_COMPLETION_ENABLE=vim.eval('g:predictive#fuzzy_completion_enable')
 FUZZY_COMPLETION_MIN_CHARS=int(vim.eval('g:predictive#fuzzy_completion_min_chars'))
@@ -39,7 +38,8 @@ ORIGIN_NOTE = vim.eval("g:predictive#OriginNotePredictive")
 AUTO_ADD_MIN_CHARS=int(vim.eval('g:predictive#auto_add_min_chars'))
 MIN_CHARS_SUGGESTION=int(vim.eval('g:predictive#min_chars_suggestion'))
 WANT_SHOW_ORIGIN = int(vim.eval("g:predictive#ShowOriginNote"))
-VIM_COMMAND_PREDICTIVE_COMPLETE = 'silent let s:__predictive_complete_lookup_result = %s'
+VIM_COMMAND_PREDICTIVE_COMPLETE = "silent let s:__predictive_complete_lookup_result = "
+KEYWORD_PATTERNS = vim.eval("g:predictive#keyword_patterns")
 
 encoding = vim.eval("&encoding")
 
@@ -53,7 +53,7 @@ def load_dict():
     mode loads and unloads dictionaries automatically, as needed.
     """
     words = utils.read_file(DICT_PATH, encoding)
-    vim.command('let g:predictive#words = %s' % words)
+    vim.command('let g:predictive#words = ' + utils.PythonDictToVimStr(words))
 
 def save_dict():
     """
@@ -64,8 +64,8 @@ def save_dict():
     utils.write_file(DICT_PATH, words, encoding)
 
 def find_word():
-    words = vim.eval('g:predictive#words')
-    word = vim.eval("a:word").decode(encoding)
+    words = vim.eval('g:predictive#words')    
+    word = vim.eval("a:word")
     if len(word) > 0 and IGNORE_INITIAL_CAPS:
         word = word[0].lower() + word[1:]
     found_matches=[]
@@ -79,12 +79,12 @@ def find_word():
     #fuzzy search
     if FUZZY_COMPLETION_ENABLE:
         if len(word) >= FUZZY_COMPLETION_MIN_CHARS:
-            found_matches.extend(utils.fuzzy_completion(list(words), word, FUZZY_COMPLETION_MIN_DISTANCE, MAX_CANDIDATES))
-    vim.command(VIM_COMMAND_PREDICTIVE_COMPLETE
-                % repr(utils.produce_result_value(
+            found_matches.extend(utils.fuzzy_completion(list(words), word, FUZZY_COMPLETION_MIN_DISTANCE, MAX_CANDIDATES))    
+    result = utils.produce_result_value(
                 found_matches,
                 ORIGIN_NOTE,
-                WANT_SHOW_ORIGIN)))
+                WANT_SHOW_ORIGIN)
+    vim.command(VIM_COMMAND_PREDICTIVE_COMPLETE + result)   
 
 def add_to_dict():
     """
@@ -110,10 +110,10 @@ def add_to_dict():
                 words[w] = int(words[w]) + 1
         else:
             if AUTO_ADD_TO_DICT:
-                if utils.is_valid_word(w, SAVE_IDENTIFIERS):
+                if utils.is_valid_word(w, KEYWORD_PATTERNS):
                     if len(w) >= AUTO_ADD_MIN_CHARS:
-                        words.setdefault(w.encode(encoding), 0)
-        vim.command('let g:predictive#words = %s' % words)
+                        words.setdefault(w, 0)                        
+        vim.command('let g:predictive#words = ' + utils.PythonDictToVimStr(words))
     return ''
 
 def remove_from_dict():
@@ -121,13 +121,13 @@ def remove_from_dict():
     Completely remove a word from a dictionary. The dictionary name and word
     are read from the mini-buffer (defaults to the word at the point).
     """
-    words = vim.eval('g:predictive#words')
-    word = vim.eval("a:word").decode(encoding)
+    words = vim.eval('g:predictive#words')    
+    word = vim.eval("a:word")
     if word in words:
         del words[word]
         msg = 'predictive: the word (' + word + ') has been deleted'
         vim.command('echohl ErrorMsg | echomsg "%s" | echohl None' % msg)
-        vim.command('let g:predictive#words = %s' % words)
+        vim.command('let g:predictive#words = ' + utils.PythonDictToVimStr(words))
 
 def reset_weight():
     """
@@ -135,15 +135,15 @@ def reset_weight():
     are read from the mini-buffer. If no word is supplied, reset the weights of all
     words in the dictionary. If a prefix argument is supplied, reset weight(s) to that
     value, rather than 0.
-    """
-    word=vim.eval("s:word").decode(encoding)
+    """    
+    word=vim.eval("s:word")
     weight = vim.eval("s:weight")
     words = vim.eval('g:predictive#words')
     if word == '':
         words = utils.dict_reset_all_values(words, weight)
     else:
         words = utils.dict_reset_value(words, word, weight)
-    vim.command('let g:predictive#words = %s' % words)
+    vim.command('let g:predictive#words = ' + utils.PythonDictToVimStr(words))
 
 def learn_from_buffer():
     """
@@ -167,11 +167,7 @@ def learn_from_buffer():
                     words[w] = int(words[w]) + 1
             else:
                 if AUTO_ADD_TO_DICT:
-                    if utils.is_valid_word(w, SAVE_IDENTIFIERS):
+                    if utils.is_valid_word(w, KEYWORD_PATTERNS):
                         if len(w) >= AUTO_ADD_MIN_CHARS:
-                            try:
-                                words.setdefault(w.encode(encoding), 0)
-                            except Exception, e:
-                                words.setdefault(w, 0)
-                                continue
-    vim.command('let g:predictive#words = %s' % words)
+                            words.setdefault(w, 0)                            
+    vim.command('let g:predictive#words = ' + utils.PythonDictToVimStr(words))
