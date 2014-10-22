@@ -2,7 +2,7 @@
 "         predict what should come next.
 "      Author: Primitivo Roman
 "      Email: primitivo.roman.montero@gmail.com
-"      Date: 21-07-2014
+"      Date: 22-10-2014
 "      Version: 1.0
 " vim-predictive is free software: you can redistribute it and/or modify
 " it under the terms of the GNU General Public License as published by
@@ -17,22 +17,40 @@
 let s:plugin_path = escape(expand('<sfile>:p:h'), '\')
 
 function! predictive#enable()
+    if !exists("g:predictive#words")
+        let g:predictive#words = {}
+    endif
     call predictive#load_dict()
     let g:predictive#disable_plugin=0
     let g:predictive#old_completefunc = &completefunc
     let &completefunc = 'predictive#complete'
-    for key in keys(g:predictive#file_types)
-        call add(g:predictive#file_types[key], {
-            \   'command'      : "\<C-x>\<C-u>",
-            \   'completefunc' : 'predictive#complete',
-            \   'meets'        : 'predictive#meets_for_predictive',
-            \   'repeat'       : '0',
-        \})
-    endfor
+
     if !exists("g:acp_behavior")
         let g:acp_behavior = {}
+        call add(g:acp_behavior['*'], {})
     endif
-    call extend(g:acp_behavior, g:predictive#file_types, 'keep')
+    if !exists("g:predictive#file_types")
+        for key in keys(g:acp_behavior)
+            call add(g:acp_behavior[key], {
+                    \   'command'      : "\<C-x>\<C-u>",
+                    \   'completefunc' : 'predictive#complete',
+                    \   'meets'        : 'predictive#meets_for_predictive',
+                    \   'repeat'       : '0',
+                    \})
+        endfor
+    else
+        for name in g:predictive#file_types
+            if !has_key(g:acp_behavior, name)
+                let g:acp_behavior[name] = []
+            endif
+            call add(g:acp_behavior[name], {
+                    \   'command'      : "\<C-x>\<C-u>",
+                    \   'completefunc' : 'predictive#complete',
+                    \   'meets'        : 'predictive#meets_for_predictive',
+                    \   'repeat'       : '0',
+                    \})
+        endfor
+    endif
 endfunction
 
 function! predictive#disable()

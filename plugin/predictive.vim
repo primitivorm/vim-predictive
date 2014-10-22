@@ -2,7 +2,7 @@
 "                   predict what should come next.
 "        Author: Primitivo Roman
 "        Email: primitivo.roman.montero@gmail.com
-"        Date: 17-07-2014
+"        Date: 22-10-2014
 "        Version: 1.0
 " vim-predictive is free software: you can redistribute it and/or modify
 " it under the terms of the GNU General Public License as published by
@@ -18,9 +18,6 @@
 "basic configuration: add next lines to your .vimrc
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "let g:predictive#dict_path        = expand($HOME . '/quick_references/predictive_dict.txt')
-"let &completefunc='predictive#complete'
-"let g:acp_behaviorUserDefinedFunction = 'predictive#complete'
-"let g:acp_behaviorUserDefinedMeets = 'predictive#meets_for_predictive'
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 if exists("g:loaded_predictive")

@@ -37,14 +37,6 @@ Default = ''
 View {dict_sample} directory for saples. The file must be file read/write
 permissions
 
-###The `completefunc` option
-
-Set lines below in your _vimrc for automatic prediction:
-
-    let &completefunc='predictive#complete'
-    let g:acp_behaviorUserDefinedFunction = 'predictive#complete'
-    let g:acp_behaviorUserDefinedMeets = 'predictive#meets_for_predictive'
-
 NOTE:
 --------------
 This is a testing version. Pull requests welcome!
