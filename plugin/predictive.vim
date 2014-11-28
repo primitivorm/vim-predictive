@@ -83,6 +83,10 @@ if !exists("g:predictive#keyword_patterns")
     let g:predictive#keyword_patterns = '^[a-zA-Z]+$'
 endif
 
+if !exists("g:predictive#debug")
+    let g:predictive#debug=0
+endif
+
 "Controls automatic word frequency learning. When non-nil (the default), the
 "weight for a word in is incremented each time it is accepted as a completion,
 "making the word more likely to be offered higher up the list of completions in
