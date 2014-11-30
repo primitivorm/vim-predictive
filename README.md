@@ -3,10 +3,10 @@ vim-predictive
 Given the first few letters of a word, for instance, it’s not too difficult to predict what should come next.
 
 Like android phone text completion:
-![primitivorm android](https://github.com/primitivorm/vim-predictive/tree/master/dict_sample/predictive_android.jpg "predictive android")
+![primitivorm android](https://github.com/primitivorm/vim-predictive/master/dict_sample/predictive_android.jpg "predictive android")
 
 With vim-predictive plugin:
-![predictive vim](https://github.com/primitivorm/vim-predictive/tree/master/dict_sample/predictive_vim.png "predictive vim")
+![predictive vim](https://github.com/primitivorm/vim-predictive/master/dict_sample/predictive_vim.png "predictive vim")
 
 
 install
