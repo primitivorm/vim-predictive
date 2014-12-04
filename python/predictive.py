@@ -81,6 +81,7 @@ def find_word():
         if len(found_matches) >= MAX_CANDIDATES:
             break
     #fuzzy search
+    rest = MAX_CANDIDATES - len(found_matches)
     if FUZZY_COMPLETION_ENABLE:
         if len(word) >= FUZZY_COMPLETION_MIN_CHARS:
             found_matches.extend(
@@ -88,9 +89,9 @@ def find_word():
                     list(words),
                     word,
                     FUZZY_COMPLETION_MIN_DISTANCE,
-                    MAX_CANDIDATES))
+                    rest))
     result = utils.produce_result_value(
-        found_matches,
+        found_matches[0:MAX_CANDIDATES],
         ORIGIN_NOTE,
         WANT_SHOW_ORIGIN)
     vim.command(VIM_COMMAND_PREDICTIVE_COMPLETE + result)

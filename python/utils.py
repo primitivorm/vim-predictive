@@ -135,61 +135,24 @@ def levenshtein(source, target):
 
 def fuzzy_completion(_list, word, MIN_DISTANCE, MAX_RESULTS=10):
     results = []
-    distances = None
-    distances_1 = {}
-    distances_2 = {}
     try:
-        first_char = word[0].lower()
+        first_char = word[0]
     except:
         first_char = ''
     word_len = len(word)
-    word_lower = word.lower()
     endwalk = False
-    for w in _list:
+    new_list = (wr for wr in _list if len(wr) >= word_len)
+    for w in new_list:
         wl = w.lower()
-        if wl.startswith(word_lower[0:len(word_lower)]):
+        if wl.startswith(word[0:len(word)]):
             results.append(w)
             if len(results) >= MAX_RESULTS:
-                endwalk = True
                 break
         else:
-            if wl.startswith(first_char):
-                distances = distances_1
-                distances_2 = {}
-            elif not distances_1:
-                distances = distances_2
-            if distances != None:
-                w_len = len(w)
-                if word_len < w_len:
-                    w_len = word_len
-                d = levenshtein(w[0:w_len], word)
-                if d <= MIN_DISTANCE:
-                    try:
-                        distancesList = distances[d]
-                    except:
-                        distancesList = []
-                        distances[d] = distancesList
-                    distancesList.append(w)
-            distances = None
-        if endwalk:
-            break
-    if distances_1:
-        distances = distances_1
-    else:
-        distances = distances_2
-    results.sort(
-        lambda a, b: \
-            (0 if len(a) == len(b) else {True: -1, False: 1}[len(a) < len(b)]))
-    keys = list(distances.keys())
-    keys.sort()
-    fuzzylen = int(MAX_RESULTS)-len(results)
-    if fuzzylen >= 0:
-        for k in keys:
-            distancesList = distances[k]
-            results.extend(distancesList)
-            del distances[k]
+            d = levenshtein(word, w[0:len(w)])
+            if d <= MIN_DISTANCE:
+                results.append(w)
             if len(results) >= MAX_RESULTS:
-                results = results[0:MAX_RESULTS]
                 break
     return results
 
