@@ -33,7 +33,7 @@ if !exists("g:predictive#dict_path")
      finish
 endif
 
-let s:__predictive_complete_lookup_result=[]
+let s:__predictive_complete_lookup=[]
 
 if !exists("g:predictive#OriginNotePredictive")
     let g:predictive#OriginNotePredictive="    << predictive"

@@ -35,9 +35,9 @@ ORIGIN_NOTE = vim.eval("g:predictive#OriginNotePredictive")
 AUTO_ADD_MIN_CHARS = int(vim.eval('g:predictive#auto_add_min_chars'))
 MIN_CHARS_SUGGESTION = int(vim.eval('g:predictive#min_chars_suggestion'))
 WANT_SHOW_ORIGIN = int(vim.eval("g:predictive#ShowOriginNote"))
-VIM_COMMAND_PREDICTIVE_COMPLETE = "silent let s:__predictive_complete_lookup_result = "
+VIM_COMMAND_PREDICTIVE_COMPLETE = "silent let s:__predictive_complete_lookup="
 KEYWORD_PATTERNS = vim.eval("g:predictive#keyword_patterns")
-DEBUG = vim.eval("g:predictive#debug")
+DEBUG = int(vim.eval("g:predictive#debug"))
 
 ENCODING = vim.eval("&encoding")
 
@@ -50,25 +50,26 @@ def load_dict():
     You should never normally need to use this command interactively, since
     predictive mode loads and unloads dictionaries automatically, as needed.
     """
-    log("inicia load_dict")
+    #log("inicia load_dict")
     words = utils.read_file(DICT_PATH, ENCODING)
-    vim.command('let g:predictive#words = ' + utils.python_dict_to_vim_str(words))
-    log("finaliza load_dict")
+    vim.command('let g:predictive#words = ' +
+        utils.python_dict_to_vim_str(words))
+    #log("finaliza load_dict")
 
 def save_dict():
     """
     Save dictionary DICT to its associated file.
     Use `predictive-write-dict' to save to a different file.
     """
-    log("inicia save_dict")
+    #log("inicia save_dict")
     words = vim.eval('g:predictive#words')
     utils.write_file(DICT_PATH, words, ENCODING)
-    log("finaliza save_dict")
+    #log("finaliza save_dict")
 
 def find_word():
-    log("inicia find_word")
     words = vim.eval('g:predictive#words')
     word = vim.eval("a:word")
+    log("find_word: " + word)
     if len(word) > 0 and IGNORE_INITIAL_CAPS:
         word = word[0].lower() + word[1:]
     found_matches = []
@@ -93,18 +94,19 @@ def find_word():
         ORIGIN_NOTE,
         WANT_SHOW_ORIGIN)
     vim.command(VIM_COMMAND_PREDICTIVE_COMPLETE + result)
-    log("finaliza find_word")
+    log("find_word end")
 
 def add_to_dict():
     """
     Insert a word into a dictionary. The dictionary name and word are read from
     the mini-buffer (defaults to the word at the point). An optional prefix
-    argument specifies the weight. If the word is not already in the dictionary,
-    it will be added to it with that initial weight
+    argument specifies the weight. If the word is not already in the
+    dictionary, it will be added to it with that initial weight
     (or 0 if none is supplied). If the word is already in the dictionary,
-    its weight will be incremented by the weight value (or by 1 if none is supplied).
+    its weight will be incremented by the weight value
+    (or by 1 if none is supplied).
     """
-    log("inicia add_to_dict")
+    #log("inicia add_to_dict")
     words = vim.eval('g:predictive#words')
     (r, c) = vim.current.window.cursor
     ws = vim.current.line[:c]
@@ -112,9 +114,9 @@ def add_to_dict():
     w = ''
     if len(l) > 1:
         w = l[-1]
-    elif len (l) == 1:
+    elif len(l) == 1:
         w = l[0]
-    if w!='':
+    if w != '':
         if w in words:
             if AUTO_LEARN:
                 words[w] = int(words[w]) + 1
@@ -123,8 +125,9 @@ def add_to_dict():
                 if utils.is_valid_word(w, KEYWORD_PATTERNS):
                     if len(w) >= AUTO_ADD_MIN_CHARS:
                         words.setdefault(w, 0)
-        vim.command('let g:predictive#words = ' + utils.python_dict_to_vim_str(words))
-    log("finaliza add_to_dict")
+        vim.command('let g:predictive#words = ' +
+            utils.python_dict_to_vim_str(words))
+    #log("finaliza add_to_dict")
     return ''
 
 def remove_from_dict():
@@ -132,15 +135,16 @@ def remove_from_dict():
     Completely remove a word from a dictionary. The dictionary name and word
     are read from the mini-buffer (defaults to the word at the point).
     """
-    log("inicia remove_from_dict")
+    #log("inicia remove_from_dict")
     words = vim.eval('g:predictive#words')
     word = vim.eval("a:word")
     if word in words:
         del words[word]
         msg = 'predictive: the word (' + word + ') has been deleted'
         vim.command('echohl ErrorMsg | echomsg "%s" | echohl None' % msg)
-        vim.command('let g:predictive#words = ' + utils.python_dict_to_vim_str(words))
-    log("finaliza remove_from_dict")
+        vim.command('let g:predictive#words = ' +
+            utils.python_dict_to_vim_str(words))
+    #log("finaliza remove_from_dict")
 
 def reset_weight():
     """
@@ -149,32 +153,32 @@ def reset_weight():
     weights of all words in the dictionary. If a prefix argument is supplied,
     reset weight(s) to that value, rather than 0.
     """
-    log("inicia reset_weight")
-    word=vim.eval("s:word")
+    #log("inicia reset_weight")
+    word = vim.eval("s:word")
     weight = vim.eval("s:weight")
     words = vim.eval('g:predictive#words')
     if word == '':
         words = utils.dict_reset_all_values(words, weight)
     else:
         words = utils.dict_reset_value(words, word, weight)
-    vim.command('let g:predictive#words = ' + utils.python_dict_to_vim_str(words))
-    log("finaliza reset_weight")
+    vim.command('let g:predictive#words = ' +
+        utils.python_dict_to_vim_str(words))
+    #log("finaliza reset_weight")
 
 def learn_from_buffer():
     """
-    Learns weights for words in a dictionary from text in a buffer. If no explicit
-    dictionary is specified, this learns word weights for all dictionaries used by the
-    current buffer.
-    Each occurrence of a word increments its weight in the dictionary. By default,
-    only occurrences that occur in a region where the dictionary is active are
-    counted. If an explicit
-    dictionary is specified, this can be overridden by supplying a prefix argument,
-    in which case all occurrences are counted, irrespective of whether the dictionary
-    is active at the word occurrence. Note that you cannot use this command
-    to add words to a dictionary, only to train the weights of words already in a
-    dictionary.
+    Learns weights for words in a dictionary from text in a buffer.
+    If no explicit dictionary is specified, this learns word weights for all
+    dictionaries used by the current buffer.
+    Each occurrence of a word increments its weight in the dictionary.
+    By default, only occurrences that occur in a region where the dictionary is
+    active are counted. If an explicit dictionary is specified, this can be
+    overridden by supplying a prefix argument, in which case all occurrences
+    are counted, irrespective of whether the dictionary is active at the word
+    occurrence. Note that you cannot use this command to add words to a
+    dictionary, only to train the weights of words already in a dictionary.
     """
-    log("inicia learn_from_buffer")
+    #log("inicia learn_from_buffer")
     words = vim.eval('g:predictive#words')
     for line in vim.current.buffer:
         for w in line.split():
@@ -186,8 +190,9 @@ def learn_from_buffer():
                     if utils.is_valid_word(w, KEYWORD_PATTERNS):
                         if len(w) >= AUTO_ADD_MIN_CHARS:
                             words.setdefault(w, 0)
-    vim.command('let g:predictive#words = ' + utils.python_dict_to_vim_str(words))
-    log("finaliza learn_from_buffer")
+    vim.command('let g:predictive#words = ' +
+        utils.python_dict_to_vim_str(words))
+    #log("finaliza learn_from_buffer")
 
 def log(msg):
     if DEBUG:

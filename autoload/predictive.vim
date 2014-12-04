@@ -150,10 +150,10 @@ endfunction
 
 function! predictive#find_word(word)
     "echoerr a:word
-    let s:__predictive_complete_lookup_result =[]
+    let s:__predictive_complete_lookup =[]
     Python import predictive
     Python predictive.find_word()
-    return s:__predictive_complete_lookup_result
+    return s:__predictive_complete_lookup
 endfunction
 
 function! predictive#dictree_size()

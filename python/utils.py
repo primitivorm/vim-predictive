@@ -92,34 +92,13 @@ def most_common(_dict, _len, _count):
             break
     return results
 
-def levenshtein(a, b):
-    """
-    Calculates the Levenshtein distance between a and b."
-    http://hetland.org/coding/python/levenshtein.py
-    """
-    n, m = len(a), len(b)
-    if n > m:
-        # Make sure n <= m, to use O(min(n,m)) space
-        a,b = b,a
-        n,m = m,n
-    current = range(n+1)
-    for i in range(1, m+1):
-        previous, current = current, [i]+[0]*n
-        for j in range(1, n+1):
-            add, delete = previous[j]+1, current[j-1]+1
-            change = previous[j-1]
-            if a[j-1] != b[i-1]:
-                change = change + 1
-            current[j] = min(add, delete, change)
-    return current[n]
-
-def levenshtein2(source, target):
+def levenshtein(source, target):
     """
     Calculates the Levenshtein distance between a and b."
     http://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#Python
     """
     if len(source) < len(target):
-        return levenshtein2(target, source)
+        return levenshtein(target, source)
 
     # So now we have len(source) >= len(target).
     if len(target) == 0:
@@ -183,8 +162,7 @@ def fuzzy_completion(_list, word, MIN_DISTANCE, MAX_RESULTS=10):
                 w_len = len(w)
                 if word_len < w_len:
                     w_len = word_len
-                #d = levenshtein(w[0:w_len], word)
-                d = levenshtein2(w[0:w_len],word)
+                d = levenshtein(w[0:w_len], word)
                 if d <= MIN_DISTANCE:
                     try:
                         distancesList = distances[d]
