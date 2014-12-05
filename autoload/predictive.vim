@@ -19,12 +19,11 @@ let s:plugin_path = escape(expand('<sfile>:p:h'), '\')
 function! predictive#enable()
     if !exists("g:predictive#words")
         let g:predictive#words = {}
+        call predictive#load_dict()
     endif
-    call predictive#load_dict()
     let g:predictive#disable_plugin=0
     let g:predictive#old_completefunc = &completefunc
     let &completefunc = 'predictive#complete'
-
     if !exists("g:acp_behavior")
         let g:acp_behavior = {}
         call add(g:acp_behavior['*'], {})

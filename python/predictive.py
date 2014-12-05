@@ -50,11 +50,11 @@ def load_dict():
     You should never normally need to use this command interactively, since
     predictive mode loads and unloads dictionaries automatically, as needed.
     """
-    #log("inicia load_dict")
+    log("inicia load_dict")
     words = utils.read_file(DICT_PATH, ENCODING)
     vim.command('let g:predictive#words = ' +
         utils.python_dict_to_vim_str(words))
-    #log("finaliza load_dict")
+    log("finaliza load_dict")
 
 def save_dict():
     """
