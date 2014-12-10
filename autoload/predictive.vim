@@ -34,7 +34,7 @@ function! predictive#enable()
                     \   'command'      : "\<C-x>\<C-u>",
                     \   'completefunc' : 'predictive#complete',
                     \   'meets'        : 'predictive#meets_for_predictive',
-                    \   'repeat'       : '0',
+                    \   'repeat'       : '1',
                     \})
         endfor
     else
@@ -46,7 +46,7 @@ function! predictive#enable()
                     \   'command'      : "\<C-x>\<C-u>",
                     \   'completefunc' : 'predictive#complete',
                     \   'meets'        : 'predictive#meets_for_predictive',
-                    \   'repeat'       : '0',
+                    \   'repeat'       : '1',
                     \})
         endfor
     endif

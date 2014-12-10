@@ -31,10 +31,10 @@ FUZZY_COMPLETION_MIN_CHARS = int(vim.eval(
     'g:predictive#fuzzy_completion_min_chars'))
 FUZZY_COMPLETION_MIN_DISTANCE = int(vim.eval(
     'g:predictive#fuzzy_completion_min_distance'))
-ORIGIN_NOTE = vim.eval("g:predictive#OriginNotePredictive")
+ORIGIN_NOTE = vim.eval("g:predictive#origin_note")
 AUTO_ADD_MIN_CHARS = int(vim.eval('g:predictive#auto_add_min_chars'))
 MIN_CHARS_SUGGESTION = int(vim.eval('g:predictive#min_chars_suggestion'))
-WANT_SHOW_ORIGIN = int(vim.eval("g:predictive#ShowOriginNote"))
+WANT_SHOW_ORIGIN = int(vim.eval("g:predictive#show_origin_note"))
 VIM_COMMAND_PREDICTIVE_COMPLETE = "silent let s:__predictive_complete_lookup="
 KEYWORD_PATTERNS = vim.eval("g:predictive#keyword_patterns")
 DEBUG = int(vim.eval("g:predictive#debug"))
@@ -86,7 +86,7 @@ def find_word():
         if len(word) >= FUZZY_COMPLETION_MIN_CHARS:
             found_matches.extend(
                 utils.fuzzy_completion(
-                    list(words),
+                    words,
                     word,
                     FUZZY_COMPLETION_MIN_DISTANCE,
                     rest))

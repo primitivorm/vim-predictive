@@ -133,7 +133,8 @@ def levenshtein(source, target):
 
     return previous_row[-1]
 
-def fuzzy_completion(_list, word, MIN_DISTANCE, MAX_RESULTS=10):
+def fuzzy_completion(_dict, word, MIN_DISTANCE=3, MAX_RESULTS=10):
+    _list = list(_dict)
     results = []
     try:
         first_char = word[0]
@@ -141,6 +142,7 @@ def fuzzy_completion(_list, word, MIN_DISTANCE, MAX_RESULTS=10):
         first_char = ''
     word_len = len(word)
     endwalk = False
+    #create a generator
     new_list = (wr for wr in _list if len(wr) >= word_len)
     for w in new_list:
         wl = w.lower()

@@ -35,20 +35,20 @@ endif
 
 let s:__predictive_complete_lookup=[]
 
-if !exists("g:predictive#OriginNotePredictive")
-    let g:predictive#OriginNotePredictive="    << predictive"
+if !exists("g:predictive#origin_note")
+    let g:predictive#origin_note="    << predictive"
 endif
 
 if !exists("g:predictive#behaviorLength")
     let g:predictive#behaviorLength=3
 endif
 
-if !exists("g:predictive#ShowOriginNote")
-    let g:predictive#ShowOriginNote=1
+if !exists("g:predictive#show_origin_note")
+    let g:predictive#show_origin_note=1
 endif
 
 if !exists("g:predictive#max_candidates")
-    let g:predictive#max_candidates=25
+    let g:predictive#max_candidates=10
 endif
 
 if !exists("g:predictive#prefer_python3")
@@ -60,11 +60,11 @@ if !exists("g:predictive#fuzzy_completion_enable")
 endif
 
 if !exists("g:predictive#fuzzy_completion_min_chars")
-    let g:predictive#fuzzy_completion_min_chars=5
+    let g:predictive#fuzzy_completion_min_chars=8
 endif
 
 if !exists("g:predictive#fuzzy_completion_min_distance")
-    let g:predictive#fuzzy_completion_min_distance=4
+    let g:predictive#fuzzy_completion_min_distance=3
 endif
 
 if !exists("g:predictive#auto_save_dict")
