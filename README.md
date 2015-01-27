@@ -11,9 +11,12 @@ With vim-predictive plugin:
 
 install
 --------------
-you only need add to Bundle list or install with pathogen
+1. this plugin requires numpy, install with pip:
+$pip install numpy
 
-Bundle 'primitivorm/vim-predictive'
+2. add to Bundle list or install with pathogen:
+
+Plugin 'primitivorm/vim-predictive'
 
 options
 --------------
