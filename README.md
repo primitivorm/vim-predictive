@@ -45,9 +45,9 @@ Default = ''
 
     let g:predictive#dict_path = expand($HOME . '/dict')
 
-View {dict_sample} directory for saples. The file must be file read/write
+View {dict_sample} directory for samples. The file must be file read/write
 permissions
 
 NOTE:
 --------------
-This is a testing version. Pull requests welcome!
+Pull requests welcome!
